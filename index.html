@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>መልሕቅ የገንዘብ ቁጠባና ብድር ማኅበር</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --green-dark: #0e4d2e;
+      --green-mid: #166534;
+      --green-light: #ecfdf5;
+      --gold: #c59b27;
+      --gold-light: #fef9c3;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #1f2937;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; padding: 0; background: var(--bg); color: var(--text); padding-bottom: 65px; }
+    
+    /* Top Header */
+    .header {
+      background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+      color: #fff;
+      padding: 14px 16px;
+      border-bottom: 4px solid var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-text h1 { margin: 0; font-size: 16px; line-height: 1.3; }
+    .header-text p { margin: 3px 0 0; font-size: 12px; color: #fde047; font-style: italic; }
+    .admin-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid var(--gold);
+      color: #fde047;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Sticky Top Nav (Safe from bottom banners) */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      background: #fff;
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      overflow-x: auto;
+    }
+    .top-nav button {
+      flex: 1;
+      padding: 10px 6px;
+      border: none;
+      background: none;
+      font-size: 12px;
+      font-weight: 700;
+      color: #4b5563;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    .top-nav button.active {
+      color: var(--green-dark);
+      border-bottom: 3px solid var(--gold);
+      background: var(--green-light);
+    }
+
+    .container { padding: 14px; max-width: 720px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .news-banner {
+      background: var(--gold-light);
+      border-left: 4px solid var(--gold);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #78350f;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border-top: 3px solid var(--green-mid);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: var(--green-dark);
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 6px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .service-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid var(--green-mid);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .service-box h3 { margin: 0 0 4px; font-size: 14px; color: var(--green-dark); }
+    .service-box p { margin: 0; font-size: 12.5px; color: #4b5563; line-height: 1.5; }
+
+    .fee-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed #e5e7eb; font-size: 13.5px; }
+    .fee-total { display: flex; justify-content: space-between; padding: 10px; background: var(--green-light); border-radius: 8px; font-weight: bold; color: var(--green-dark); margin-top: 8px; font-size: 14px; }
+
+    label { display: block; font-size: 12.5px; font-weight: 700; margin: 10px 0 4px; color: #374151; }
+    input, select, textarea {
+      width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--green-mid); }
+
+    .result-box {
+      background: var(--gold-light);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .result-item { display: flex; justify-content: space-between; margin: 6px 0; font-size: 13.5px; }
+    .result-item strong { color: var(--green-dark); }
+
+    .btn {
+      width: 100%; padding: 12px; background: var(--green-dark); color: #fff; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 14px; cursor: pointer;
+    }
+    .btn:active { background: var(--green-mid); }
+    .btn-gold { background: var(--gold); color: #1f2937; }
+    .btn-outline { background: #fff; color: var(--green-dark); border: 1.5px solid var(--green-dark); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    th, td { border: 1px solid #e5e7eb; padding: 7px; text-align: left; }
+    th { background: var(--green-light); color: var(--green-dark); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-text">
+      <h1 id="uiOrgName">መልሕቅ የገንዘብ ቁጠባና ብድር ማኅበር</h1>
+      <p id="uiSlogan">«የነገ ዕረፍትዎ፤ የዛሬ ምርጫዎ ነው»</p>
+    </div>
+    <button class="admin-btn" onclick="openAdmin()">⚙️ Admin</button>
+  </div>
+
+  <!-- Top Navigation (Same across Web, Telegram Mini App & Android APK) -->
+  <div class="top-nav">
+    <button class="active" onclick="switchTab('home', this)">🏠 ዋና ገጽ</button>
+    <button onclick="switchTab('services', this)">💼 አገልግሎቶች</button>
+    <button onclick="switchTab('calc', this)">🧮 ማስሊያ</button>
+    <button onclick="switchTab('register', this)">📝 ምዝገባ</button>
+    <button id="navAdminBtn" style="display:none; color:#b45309;" onclick="switchTab('admin', this)">🛠️ ማስተካከያ</button>
+  </div>
+
+  <div class="container">
+    <div class="news-banner" id="uiNews">📢 አዲስ አባላት በ2,530 ብር መነሻ ክፍያ በመመዝገብ የ3 እጥፍ ብድር ተጠቃሚ ይሁኑ!</div>
+
+    <!-- 1. ዋና ገጽ (Home) -->
+    <div id="tab-home" class="tab-content active">
+      <div class="card">
+        <h2>፩. የአዲስ አባላት መነሻ ክፍያ</h2>
+        <div class="fee-row"><span>መመዝገቢያ (እስከ 4 ወር የሚከፈል)</span><strong id="uiRegFee">1,000 ብር</strong></div>
+        <div class="fee-row"><span>ለዕጣ / ሼር (እስከ 4 ወር የሚከፈል)</span><strong id="uiShareFee">1,000 ብር</strong></div>
+        <div class="fee-row"><span>ወርሐዊ ዝቅተኛ ቁጠባ</span><strong id="uiMinSave">500 ብር</strong></div>
+        <div class="fee-row"><span>የሥራ ማስኬጃ ክፍያ</span><strong id="uiAdminFee">30 ብር</strong></div>
+        <div class="fee-total"><span>ጠቅላላ መነሻ ክፍያ</span><span id="uiTotalStart">2,530 ብር</span></div>
+      </div>
+
+      <div class="card">
+        <h2>፪. ዋና ዋና የቁጠባና ብድር ህጎች</h2>
+        <p style="font-size:13.5px; line-height:1.65; margin:0;">
+          • <strong>ወርሐዊ ቁጠባ፡</strong> ከ<span id="uiRuleMin">500</span> እስከ <span id="uiRuleMax">10,000</span> ብር (+<span id="uiRuleAdmin">30</span> ብር የሥራ ማስኬጃ)።<br>
+          • <strong>የብድር መጠን፡</strong> ለ6 ተከታታይ ወር የቆጠቡትን <strong><span id="uiRuleMult">3</span> እጥፍ</strong> እስከ <strong><span id="uiRuleCap">100,000</span> ብር</strong> ጣሪያ።<br>
+          • <strong>ወለድ፡</strong> <span id="uiRuleRate">12</span>% ዓመታዊ ወለድ <strong>ከቀሪ ሒሳብ (Reducing Balance)</strong> ላይ ብቻ የሚታሰብ።
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>፫. ያግኙን</h2>
+        <p style="font-size:13.5px; margin:0; line-height:1.7;">
+          ☎️ ስልክ፡ <strong id="uiPhones">0920714309 / 0912720531</strong><br>
+          ✈️ ቴሌግራም፡ <strong id="uiTelegrams">@Lifeismuchboring / @iyob31</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. አገልግሎቶች (Services - Like Awach & Amigos) -->
+    <div id="tab-services" class="tab-content">
+      <div class="card">
+        <h2>የቁጠባ አማራጮች (Savings Products)</h2>
+        <div class="grid-2">
+          <div class="service-box">
+            <h3>💰 መደበኛ ወርሐዊ ቁጠባ</h3>
+            <p>በየወሩ ከ500 እስከ 10,000 ብር የሚቆጠብ፣ ለ3 እጥፍ ብድር ዋስትና የሚሆን መሰረታዊ ቁጠባ።</p>
+          </div>
+          <div class="service-box">
+            <h3>📈 የጊዜ ገደብ ቁጠባ (Fixed Deposit)</h3>
+            <p>ለ6 ወር፣ ለ1 ዓመት ወይም ከዚያ በላይ የሚቀመጥ ከፍተኛ ወለድ የሚያስገኝ ቁጠባ።</p>
+          </div>
+          <div class="service-box">
+            <h3>🎓 የልጆች እና የትምህርት ቁጠባ</h3>
+            <p>ለልጆችዎ የወደፊት ትምህርት እና ህይወት መሰረት የሚሆን ልዩ የቁጠባ ሂሳብ።</p>
+          </div>
+          <div class="service-box">
+            <h3>🏠 የቤት እና የንግድ መነሻ ቁጠባ</h3>
+            <p>የራስዎን ቤት ለመግዛት ወይም ንግድ ለመጀመር የሚያግዝ የታለመ ቁጠባ።</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>የብድር አገልግሎቶች (Loan Products)</h2>
+        <div class="grid-2">
+          <div class="service-box">
+            <h3>🏪 የንግድ ማስፋፊያ ብድር</h3>
+            <p>ነባር ንግድዎን ለማሳደግ ወይም አዲስ ስራ ለመጀመር በ12% ቀሪ ሒሳብ ወለድ የሚሰጥ።</p>
+          </div>
+          <div class="service-box">
+            <h3>⚡ የአስቸኳይ ጊዜ ብድር</h3>
+            <p>ለድንገተኛ ህክምና እና አስቸኳይ ጉዳዮች በአጭር ጊዜ ውስጥ የሚሰጥ ፈጣን ብድር።</p>
+          </div>
+        </div>
+        <button class="btn" onclick="switchTab('register', document.querySelectorAll('.top-nav button')[3])">አሁኑኑ አባል ይሁኑ 📝</button>
+      </div>
+    </div>
+
+    <!-- 3. ማስሊያ (Calculator) -->
+    <div id="tab-calc" class="tab-content">
+      <div class="card">
+        <h2>የቁጠባና ብድር ማስሊያ (በቀሪ ሒሳብ ወለድ)</h2>
+        <label>ወርሐዊ ቁጠባዎን ያስገቡ (ብር)፡</label>
+        <input type="number" id="monthlySave" value="2000" min="500" max="10000" oninput="calculateLoan()" />
+
+        <label>የቁጠባ ጊዜ (ቢያንስ 6 ወር)፡</label>
+        <select id="saveMonths" onchange="calculateLoan()">
+          <option value="6">6 ወር</option>
+          <option value="12">12 ወር (1 ዓመት)</option>
+          <option value="18">18 ወር</option>
+          <option value="24">24 ወር (2 ዓመት)</option>
+        </select>
+
+        <label>የብድር መመለሻ ጊዜ (በወራት)፡</label>
+        <select id="loanTerm" onchange="calculateLoan()">
+          <option value="12">12 ወር (1 ዓመት)</option>
+          <option value="18">18 ወር</option>
+          <option value="24">24 ወር (2 ዓመት)</option>
+        </select>
+
+        <div class="result-box">
+          <div class="result-item"><span>ጠቅላላ ቁጠባዎ፡</span><strong id="resSaved">12,000 ብር</strong></div>
+          <div class="result-item"><span>የሚያገኙት ብድር (<span id="calcMultLabel">3</span> እጥፍ)፡</span><strong id="resLoan">36,000 ብር</strong></div>
+          <div class="result-item"><span>ወርሐዊ ክፍያ (በቀሪ ሒሳብ)፡</span><strong id="resMonthlyPay">3,199 ብር</strong></div>
+          <div class="result-item"><span>በቀሪ ሒሳብ የሚቆጥቡት ወለድ፡</span><strong id="resSavedInterest" style="color:#b45309;">1,937 ብር</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ምዝገባ (Registration -> @Lifeismuchboring) -->
+    <div id="tab-register" class="tab-content">
+      <div class="card">
+        <h2>የአባልነት መመዝገቢያ ቅጽ</h2>
+        <form id="regForm" onsubmit="submitRegistration(event)">
+          <label>የአባሉ ሙሉ ስም *</label>
+          <input type="text" id="fullName" required placeholder="ስም፣ የአባት ስም፣ የአያት ስም" />
+
+          <label>የእናት ሙሉ ስም *</label>
+          <input type="text" id="motherName" required />
+
+          <label>ስልክ ቁጥር *</label>
+          <input type="tel" id="phone" required placeholder="09..." />
+
+          <label>ፋይዳ መታወቂያ ቁጥር (Fayda ID) *</label>
+          <input type="text" id="faydaId" required />
+
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="example@gmail.com" />
+
+          <label>ከፍተኛ የትምህርት ዝግጅት *</label>
+          <select id="education" required>
+            <option value="12ኛ ክፍል ያጠናቀቀ">12ኛ ክፍል ያጠናቀቀ</option>
+            <option value="ዲፕሎማ / TVET">ዲፕሎማ / TVET</option>
+            <option value="የመጀመሪያ ዲግሪ (BSc/BA)">የመጀመሪያ ዲግሪ (BSc/BA)</option>
+            <option value="ሁለተኛ ዲግሪ (MSc/MA) እና ከዚያ በላይ">ሁለተኛ ዲግሪ (MSc/MA) እና ከዚያ በላይ</option>
+          </select>
+
+          <label>የተመረቁበት የትምህርት ዓይነት</label>
+          <input type="text" id="fieldOfStudy" />
+
+          <label>የሥራ ዘርፍና የገቢ ምንጭ *</label>
+          <input type="text" id="occupation" required placeholder="ለምሳሌ፡ የመንግስት ሰራተኛ፣ ነጋዴ..." />
+
+          <label>የቅርብ ዘመድ / ተጠሪ ሙሉ ስምና ስልክ ቁጥር *</label>
+          <input type="text" id="emergencyContact" required placeholder="ስም እና ስልክ ቁጥር" />
+
+          <button type="submit" class="btn">መረጃውን ላክና ተመዝገብ ✅</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 5. Editable Admin Panel -->
+    <div id="tab-admin" class="tab-content">
+      <div class="card">
+        <h2>🛠️ የመተግበሪያ መረጃ ማስተካከያ (Admin Control)</h2>
+        <label>የማኅበሩ ስም፡</label>
+        <input type="text" id="editOrgName" />
+
+        <label>መሪ ቃል (Slogan)፡</label>
+        <input type="text" id="editSlogan" />
+
+        <label>የማስታወቂያ መልዕክት (News Banner)፡</label>
+        <input type="text" id="editNews" />
+
+        <div class="grid-2">
+          <div>
+            <label>መመዝገቢያ ክፍያ (ብር)፡</label>
+            <input type="number" id="editRegFee" />
+          </div>
+          <div>
+            <label>የዕጣ/ሼር ክፍያ (ብር)፡</label>
+            <input type="number" id="editShareFee" />
+          </div>
+          <div>
+            <label>ዝቅተኛ ወርሐዊ ቁጠባ (ብር)፡</label>
+            <input type="number" id="editMinSave" />
+          </div>
+          <div>
+            <label>ከፍተኛ ወርሐዊ ቁጠባ (ብር)፡</label>
+            <input type="number" id="editMaxSave" />
+          </div>
+          <div>
+            <label>የሥራ ማስኬጃ (ብር)፡</label>
+            <input type="number" id="editAdminFee" />
+          </div>
+          <div>
+            <label>የብድር ብዜት (እጥፍ)፡</label>
+            <input type="number" id="editMultiplier" />
+          </div>
+          <div>
+            <label>ዓመታዊ ወለድ (%)፡</label>
+            <input type="number" id="editInterestRate" />
+          </div>
+          <div>
+            <label>የብድር ጣሪያ (ብር)፡</label>
+            <input type="number" id="editLoanCap" />
+          </div>
+        </div>
+
+        <label>መረጃ የሚላክበት የቴሌግራም Username (ያለ @)፡</label>
+        <input type="text" id="editTargetTg" />
+
+        <label>የመገናኛ ስልኮች፡</label>
+        <input type="text" id="editPhones" />
+
+        <label>አዲስ የAdmin PIN ይለፍ ቃል፡</label>
+        <input type="text" id="editPin" />
+
+        <button class="btn btn-gold" onclick="saveSettings()">ለውጦችን አስቀምጥ (Save Changes) 💾</button>
+        <button class="btn btn-outline" onclick="resetSettings()">ወደ መጀመሪያው መልስ (Reset Default)</button>
+      </div>
+
+      <div class="card">
+        <h2>📋 በዚህ መሳሪያ የተመዘገቡ አባላት</h2>
+        <div style="overflow-x:auto;">
+          <table id="membersTable">
+            <thead>
+              <tr><th>ሙሉ ስም</th><th>ስልክ</th><th>ፋይዳ ID</th><th>ሥራ</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button class="btn" onclick="exportCSV()">ወደ Excel (CSV) አውርድ 📥</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) { tg.expand(); tg.ready(); }
+
+    const defaultConfig = {
+      orgName: "መልሕቅ የገንዘብ ቁጠባና ብድር ማኅበር",
+      slogan: "«የነገ ዕረፍትዎ፤ የዛሬ ምርጫዎ ነው»",
+      news: "📢 አዲስ አባላት በ2,530 ብር መነሻ ክፍያ በመመዝገብ የ3 እጥፍ ብድር ተጠቃሚ ይሁኑ!",
+      regFee: 1000,
+      shareFee: 1000,
+      minSave: 500,
+      maxSave: 10000,
+      adminFee: 30,
+      multiplier: 3,
+      interestRate: 12,
+      loanCap: 100000,
+      targetTg: "Lifeismuchboring",
+      phones: "0920714309 / 0912720531",
+      pin: "1234"
+    };
+
+    let config = JSON.parse(localStorage.getItem("melhik_config")) || { ...defaultConfig };
+    let members = JSON.parse(localStorage.getItem("melhik_members")) || [];
+
+    function applyConfig() {
+      const totalStart = Number(config.regFee) + Number(config.shareFee) + Number(config.minSave) + Number(config.adminFee);
+      document.getElementById("uiOrgName").innerText = config.orgName;
+      document.getElementById("uiSlogan").innerText = config.slogan;
+      document.getElementById("uiNews").innerText = config.news;
+      document.getElementById("uiRegFee").innerText = Number(config.regFee).toLocaleString() + " ብር";
+      document.getElementById("uiShareFee").innerText = Number(config.shareFee).toLocaleString() + " ብር";
+      document.getElementById("uiMinSave").innerText = Number(config.minSave).toLocaleString() + " ብር";
+      document.getElementById("uiAdminFee").innerText = Number(config.adminFee).toLocaleString() + " ብር";
+      document.getElementById("uiTotalStart").innerText = totalStart.toLocaleString() + " ብር";
+
+      document.getElementById("uiRuleMin").innerText = Number(config.minSave).toLocaleString();
+      document.getElementById("uiRuleMax").innerText = Number(config.maxSave).toLocaleString();
+      document.getElementById("uiRuleAdmin").innerText = Number(config.adminFee).toLocaleString();
+      document.getElementById("uiRuleMult").innerText = config.multiplier;
+      document.getElementById("uiRuleCap").innerText = Number(config.loanCap).toLocaleString();
+      document.getElementById("uiRuleRate").innerText = config.interestRate;
+      document.getElementById("uiPhones").innerText = config.phones;
+      document.getElementById("calcMultLabel").innerText = config.multiplier;
+
+      // Populate admin inputs
+      document.getElementById("editOrgName").value = config.orgName;
+      document.getElementById("editSlogan").value = config.slogan;
+      document.getElementById("editNews").value = config.news;
+      document.getElementById("editRegFee").value = config.regFee;
+      document.getElementById("editShareFee").value = config.shareFee;
+      document.getElementById("editMinSave").value = config.minSave;
+      document.getElementById("editMaxSave").value = config.maxSave;
+      document.getElementById("editAdminFee").value = config.adminFee;
+      document.getElementById("editMultiplier").value = config.multiplier;
+      document.getElementById("editInterestRate").value = config.interestRate;
+      document.getElementById("editLoanCap").value = config.loanCap;
+      document.getElementById("editTargetTg").value = config.targetTg;
+      document.getElementById("editPhones").value = config.phones;
+      document.getElementById("editPin").value = config.pin;
+
+      calculateLoan();
+      renderMembers();
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.top-nav button').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    function openAdmin() {
+      const entered = prompt("የአስተዳዳሪ (Admin) PIN ይለፍ ቃል ያስገቡ (ነባሪ: 1234)፡");
+      if (entered === config.pin) {
+        const navBtn = document.getElementById("navAdminBtn");
+        navBtn.style.display = "inline-block";
+        switchTab("admin", navBtn);
+      } else if (entered !== null) {
+        alert("የተሳሳተ የይለፍ ቃል!");
+      }
+    }
+
+    function saveSettings() {
+      config = {
+        orgName: document.getElementById("editOrgName").value,
+        slogan: document.getElementById("editSlogan").value,
+        news: document.getElementById("editNews").value,
+        regFee: Number(document.getElementById("editRegFee").value),
+        shareFee: Number(document.getElementById("editShareFee").value),
+        minSave: Number(document.getElementById("editMinSave").value),
+        maxSave: Number(document.getElementById("editMaxSave").value),
+        adminFee: Number(document.getElementById("editAdminFee").value),
+        multiplier: Number(document.getElementById("editMultiplier").value),
+        interestRate: Number(document.getElementById("editInterestRate").value),
+        loanCap: Number(document.getElementById("editLoanCap").value),
+        targetTg: document.getElementById("editTargetTg").value.replace("@", "").trim(),
+        phones: document.getElementById("editPhones").value,
+        pin: document.getElementById("editPin").value || "1234"
+      };
+      localStorage.setItem("melhik_config", JSON.stringify(config));
+      applyConfig();
+      alert("ለውጦቹ በትክክል ተቀምጠዋል! ✅");
+    }
+
+    function resetSettings() {
+      if (confirm("ሁሉንም ቅንብሮች ወደ መጀመሪያው መመለስ ይፈልጋሉ?")) {
+        config = { ...defaultConfig };
+        localStorage.setItem("melhik_config", JSON.stringify(config));
+        applyConfig();
+      }
+    }
+
+    function calculateLoan() {
+      let save = parseFloat(document.getElementById('monthlySave').value) || 0;
+      if (save < config.minSave) save = config.minSave;
+      if (save > config.maxSave) save = config.maxSave;
+      const months = parseInt(document.getElementById('saveMonths').value);
+      const term = parseInt(document.getElementById('loanTerm').value);
+
+      const totalSaved = save * months;
+      let eligibleLoan = totalSaved * config.multiplier;
+      if (eligibleLoan > config.loanCap) eligibleLoan = config.loanCap;
+
+      const r = (config.interestRate / 100) / 12;
+      const emi = r > 0 ? (eligibleLoan * r * Math.pow(1 + r, term)) / (Math.pow(1 + r, term) - 1) : (eligibleLoan / term);
+      const totalReducingInterest = (emi * term) - eligibleLoan;
+      const totalFlatInterest = eligibleLoan * (config.interestRate / 100) * (term / 12);
+      const savedInterest = Math.max(0, totalFlatInterest - totalReducingInterest);
+
+      document.getElementById('resSaved').innerText = totalSaved.toLocaleString() + ' ብር';
+      document.getElementById('resLoan').innerText = eligibleLoan.toLocaleString() + ' ብር';
+      document.getElementById('resMonthlyPay').innerText = Math.round(emi).toLocaleString() + ' ብር';
+      document.getElementById('resSavedInterest').innerText = Math.round(savedInterest).toLocaleString() + ' ብር';
+    }
+
+    function submitRegistration(e) {
+      e.preventDefault();
+      const data = {
+        fullName: document.getElementById('fullName').value,
+        motherName: document.getElementById('motherName').value,
+        phone: document.getElementById('phone').value,
+        faydaId: document.getElementById('faydaId').value,
+        email: document.getElementById('email').value,
+        education: document.getElementById('education').value,
+        fieldOfStudy: document.getElementById('fieldOfStudy').value,
+        occupation: document.getElementById('occupation').value,
+        emergencyContact: document.getElementById('emergencyContact').value
+      };
+
+      members.push(data);
+      localStorage.setItem("melhik_members", JSON.stringify(members));
+      renderMembers();
+
+      const msg = `🆕 አዲስ የመልሕቅ SACCO አባል ምዝገባ:
+
+` +
+                  `👤 ስም: ${data.fullName}
+` +
+                  `👩 የእናት ስም: ${data.motherName}
+` +
+                  `📞 ስልክ: ${data.phone}
+` +
+                  `🪪 ፋይዳ ID: ${data.faydaId}
+` +
+                  `📧 Email: ${data.email || '-'}
+` +
+                  `🎓 ትምህርት: ${data.education} (${data.fieldOfStudy || '-'})
+` +
+                  `💼 ሥራ: ${data.occupation}
+` +
+                  `🆘 ተጠሪ: ${data.emergencyContact}`;
+
+      const tgUrl = `https://t.me/${config.targetTg}?text=${encodeURIComponent(msg)}`;
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(tgUrl);
+      } else {
+        window.open(tgUrl, '_blank');
+      }
+    }
+
+    function renderMembers() {
+      const tbody = document.querySelector("#membersTable tbody");
+      tbody.innerHTML = members.map(m =>
+        `<tr><td>${m.fullName}</td><td>${m.phone}</td><td>${m.faydaId}</td><td>${m.occupation}</td></tr>`
+      ).join("");
+    }
+
+    function exportCSV() {
+      if (!members.length) { alert("ገና የተመዘገበ አባል የለም!"); return; }
+      let csv = "Full Name,Mother Name,Phone,Fayda ID,Email,Education,Field,Occupation,Emergency Contact
+";
+      members.forEach(m => {
+        csv += `"${m.fullName}","${m.motherName}","${m.phone}","${m.faydaId}","${m.email}","${m.education}","${m.fieldOfStudy}","${m.occupation}","${m.emergencyContact}"
+`;
+      });
+      const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "melhik_members.csv";
+      a.click();
+    }
+
+    applyConfig();
+  </script>
+</body>
+</html>
